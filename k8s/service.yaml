@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: opsdesk-ai-web
+spec:
+  selector:
+    app: opsdesk-ai
+    component: web
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

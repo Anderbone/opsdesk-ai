@@ -1,0 +1,146 @@
+import type { TraceRun } from "~/lib/types";
+
+export const traceRuns: TraceRun[] = [
+  {
+    id: "trace-cctv-auto-response",
+    ticketId: "tkt-cctv",
+    aiRunId: "airun-002",
+    title: "CCTV quote auto-response",
+    status: "ok",
+    startedAt: "2026-05-20T10:05:02.000Z",
+    durationMs: 1428,
+    mode: "hosted_demo",
+    spans: [
+      {
+        id: "span-cctv-request",
+        serviceName: "react-router",
+        name: "load ticket bundle",
+        kind: "server",
+        status: "ok",
+        startMs: 0,
+        durationMs: 82,
+        attributes: { route: "/tickets/tkt-cctv", ticketId: "tkt-cctv" },
+      },
+      {
+        id: "span-cctv-template",
+        parentSpanId: "span-cctv-request",
+        serviceName: "ai-worker",
+        name: "response.template_select",
+        kind: "internal",
+        status: "ok",
+        startMs: 94,
+        durationMs: 1042,
+        attributes: { promptVersion: "response.template_select-2026-05-20", confidence: 0.88 },
+        linkedEventId: "evt-1024-draft-sent",
+      },
+      {
+        id: "span-cctv-webhook",
+        parentSpanId: "span-cctv-template",
+        serviceName: "webhook-delivery",
+        name: "POST quote form handoff",
+        kind: "client",
+        status: "ok",
+        startMs: 1162,
+        durationMs: 202,
+        attributes: { endpoint: "wh-forms", responseCode: 202, idempotencyKey: "draft:draft-cctv:sent:v1" },
+        linkedWebhookAttemptId: "whd-cctv-001",
+      },
+    ],
+  },
+  {
+    id: "trace-wifi-review",
+    ticketId: "tkt-wifi",
+    aiRunId: "airun-004",
+    title: "Urgent Wi-Fi review gate",
+    status: "needs_review",
+    startedAt: "2026-05-20T09:35:24.000Z",
+    durationMs: 1388,
+    mode: "hosted_demo",
+    spans: [
+      {
+        id: "span-wifi-triage",
+        serviceName: "ai-worker",
+        name: "ticket.triage",
+        kind: "internal",
+        status: "ok",
+        startMs: 0,
+        durationMs: 733,
+        attributes: { priority: "urgent", owner: "Priya", aiRunId: "airun-003" },
+        linkedEventId: "evt-1025-triaged",
+      },
+      {
+        id: "span-wifi-policy",
+        parentSpanId: "span-wifi-triage",
+        serviceName: "policy-gate",
+        name: "urgent incident approval check",
+        kind: "internal",
+        status: "needs_review",
+        startMs: 755,
+        durationMs: 128,
+        attributes: { reason: "phone contact for urgent incident", approvalStatus: "pending" },
+        linkedEventId: "evt-1025-human-review",
+      },
+      {
+        id: "span-wifi-crm",
+        parentSpanId: "span-wifi-policy",
+        serviceName: "webhook-delivery",
+        name: "POST CRM activity",
+        kind: "client",
+        status: "ok",
+        startMs: 900,
+        durationMs: 188,
+        attributes: { endpoint: "wh-crm", responseCode: 200 },
+        linkedWebhookAttemptId: "whd-wifi-001",
+      },
+    ],
+  },
+  {
+    id: "trace-invoice-dlq",
+    ticketId: "tkt-invoice",
+    aiRunId: "airun-005",
+    title: "Invoice mismatch extraction",
+    status: "error",
+    startedAt: "2026-05-20T09:00:44.000Z",
+    durationMs: 1812,
+    mode: "hosted_demo",
+    spans: [
+      {
+        id: "span-invoice-extract",
+        serviceName: "document-worker",
+        name: "extract.document",
+        kind: "internal",
+        status: "needs_review",
+        startMs: 0,
+        durationMs: 1418,
+        attributes: { invoiceQuantity: 24, deliveredQuantity: 20, validationStatus: "needs_review" },
+        linkedEventId: "evt-1026-document-mismatch",
+      },
+      {
+        id: "span-invoice-finance",
+        parentSpanId: "span-invoice-extract",
+        serviceName: "webhook-delivery",
+        name: "POST finance exception",
+        kind: "client",
+        status: "error",
+        startMs: 1460,
+        durationMs: 190,
+        attributes: { endpoint: "wh-finance", responseCode: 422, dlq: true },
+        linkedWebhookAttemptId: "whd-invoice-001",
+      },
+    ],
+  },
+];
+
+export function findTraceByAiRunId(aiRunId: string) {
+  return traceRuns.find((trace) => trace.aiRunId === aiRunId);
+}
+
+export function getTraceStatusCounts(runs: TraceRun[] = traceRuns) {
+  return runs.reduce(
+    (counts, run) => ({
+      ...counts,
+      [run.status]: counts[run.status] + 1,
+    }),
+    { ok: 0, error: 0, needs_review: 0 },
+  );
+}

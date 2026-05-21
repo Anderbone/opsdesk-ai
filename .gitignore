@@ -1,0 +1,10 @@
+node_modules
+build
+.react-router
+.netlify
+.env
+.env.local
+data/opsdesk-demo.json
+*.log
+test-results
+playwright-report

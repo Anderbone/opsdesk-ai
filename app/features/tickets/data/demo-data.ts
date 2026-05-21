@@ -1,0 +1,277 @@
+import { demoDocuments } from "~/features/documents/data/demo-data";
+import { demoAiRuns } from "~/features/watchtower/data/demo-data";
+import type { FollowUpTask, OpsDeskState, Ticket } from "~/features/tickets/domain/types";
+
+const now = new Date("2026-05-20T10:30:00.000Z");
+
+function iso(hoursAgo: number) {
+  return new Date(now.getTime() - hoursAgo * 60 * 60 * 1000).toISOString();
+}
+
+function due(hoursFromNow: number) {
+  return new Date(now.getTime() + hoursFromNow * 60 * 60 * 1000).toISOString();
+}
+
+export const demoTickets: Ticket[] = [
+  {
+    id: "tkt-cctv",
+    number: "OD-1024",
+    title: "CCTV quote request for warehouse expansion",
+    customerName: "Amira Patel",
+    customerCompany: "Northbank Storage",
+    customerEmail: "amira@northbank.example",
+    preferredContactMethod: "message",
+    channel: "widget",
+    category: "quote",
+    priority: "high",
+    status: "waiting_customer",
+    sentiment: "neutral",
+    createdAt: iso(1.2),
+    updatedAt: iso(0.4),
+    dueAt: due(5),
+    sourceText:
+      "We are expanding our warehouse and need a quote for CCTV. Probably 12 to 16 cameras, night coverage, remote access, and fitting before month end if possible.",
+    aiSummary:
+      "Customer wants a CCTV quote for a warehouse expansion, likely 12-16 cameras with night coverage and remote access before month end.",
+    missingInfo: ["site size", "floor plan", "camera locations", "preferred install date"],
+    risks: ["Deadline may be tight without site survey", "Quote range depends on cabling length"],
+    suggestedNextAction: "Auto-send the approved site-details form and wait for floor plan plus preferred survey windows.",
+    assignedTo: "Morgan",
+    tags: ["quote", "site-survey", "cctv"],
+    automationDecision: {
+      mode: "auto_response",
+      confidence: 0.88,
+      threshold: 0.86,
+      channel: "message",
+      reason: "Safe information-gathering template matched the ticket intent and contact preference.",
+      nextStep: "Send the selected approved template and wait for the customer's missing information.",
+      templateId: "tpl-quote-site-form-message",
+      templateName: "Quote site details form",
+    },
+    draft: {
+      id: "draft-cctv",
+      body:
+        "Hi Amira, thanks for the enquiry. To prepare the quote, please complete this follow-up form with site size, floor plan or photos, preferred install date, and two survey windows: https://opsdesk.example/forms/tkt-cctv",
+      tone: "professional",
+      status: "sent",
+      createdByRunId: "airun-002",
+      updatedAt: iso(0.4),
+      templateId: "tpl-quote-site-form-message",
+      channel: "message",
+      deliveryMode: "auto_sent",
+    },
+  },
+  {
+    id: "tkt-wifi",
+    number: "OD-1025",
+    title: "Office Wi-Fi drops every afternoon",
+    customerName: "Ben Carter",
+    customerCompany: "Harbour & Co Solicitors",
+    customerEmail: "ben@harbour.example",
+    preferredContactMethod: "phone",
+    channel: "email",
+    category: "incident",
+    priority: "urgent",
+    status: "triaged",
+    sentiment: "concerned",
+    createdAt: iso(3.5),
+    updatedAt: iso(0.9),
+    dueAt: due(2),
+    sourceText:
+      "The office Wi-Fi has dropped three afternoons this week. Video calls fail around 2pm and staff switch to hotspots. Please treat as urgent.",
+    aiSummary:
+      "Recurring afternoon Wi-Fi outage affecting video calls and staff productivity. Pattern suggests congestion, AP fault, interference, or scheduled network event.",
+    missingInfo: ["router/AP model", "affected floor", "wired connection status", "recent network changes"],
+    risks: ["Business disruption during client calls", "Potential SLA escalation"],
+    suggestedNextAction: "Call customer, gather diagnostics, and dispatch engineer if wired service is stable but Wi-Fi fails.",
+    assignedTo: "Priya",
+    tags: ["urgent", "network", "diagnostics"],
+    automationDecision: {
+      mode: "human_review",
+      confidence: 0.91,
+      threshold: 0.86,
+      channel: "phone",
+      reason: "Urgent operational incidents need human ownership before outbound contact.",
+      nextStep: "Route the response to a human owner before contacting the customer.",
+      templateId: "tpl-incident-diagnostics-phone",
+      templateName: "Incident diagnostics call script",
+    },
+    draft: {
+      id: "draft-wifi",
+      body:
+        "Hi Ben,\n\nWe have marked this as urgent. Can you confirm whether wired devices stay online when Wi-Fi drops, which floor is most affected, and whether any new equipment was installed this week?\n\nWe will review the access point logs and, if needed, schedule an engineer visit for today.\n\nRegards,\nDragonTech Facilities",
+      tone: "urgent",
+      status: "draft",
+      createdByRunId: "airun-004",
+      updatedAt: iso(0.9),
+      templateId: "tpl-incident-diagnostics-phone",
+      channel: "phone",
+      deliveryMode: "approval_required",
+    },
+  },
+  {
+    id: "tkt-invoice",
+    number: "OD-1026",
+    title: "Invoice and delivery note mismatch",
+    customerName: "Sophie Lewis",
+    customerCompany: "BrightBake Kitchens",
+    customerEmail: "sophie@brightbake.example",
+    preferredContactMethod: "email",
+    channel: "upload",
+    category: "document_issue",
+    priority: "normal",
+    status: "waiting_customer",
+    sentiment: "neutral",
+    createdAt: iso(6),
+    updatedAt: iso(1.5),
+    dueAt: due(20),
+    sourceText:
+      "Uploaded purchase order, supplier invoice and delivery note. Invoice says 24 smoke detector bases but delivery note says 20 received.",
+    aiSummary:
+      "Uploaded documents show a quantity mismatch: invoice requests payment for 24 detector bases while delivery note confirms 20 received.",
+    missingInfo: ["supplier credit note status", "warehouse confirmation"],
+    risks: ["Overpayment risk", "Stock record discrepancy"],
+    suggestedNextAction: "Ask customer to confirm whether four bases are backordered or missing before approving invoice.",
+    assignedTo: "Morgan",
+    tags: ["documents", "invoice", "mismatch"],
+    automationDecision: {
+      mode: "human_review",
+      confidence: 0.79,
+      threshold: 0.86,
+      channel: "email",
+      reason: "Document mismatch can affect payment or stock records.",
+      nextStep: "Route the response to a human owner before contacting the customer.",
+      templateId: "tpl-document-mismatch-email",
+      templateName: "Document mismatch confirmation",
+    },
+  },
+  {
+    id: "tkt-insurance",
+    number: "OD-1027",
+    title: "Insurance certificate expires next week",
+    customerName: "Liam O'Neill",
+    customerCompany: "Rivergate Nursery",
+    customerEmail: "liam@rivergate.example",
+    preferredContactMethod: "email",
+    channel: "email",
+    category: "compliance",
+    priority: "high",
+    status: "scheduled",
+    sentiment: "neutral",
+    createdAt: iso(9),
+    updatedAt: iso(2),
+    dueAt: due(28),
+    sourceText:
+      "Our contractor insurance certificate on file expires next Friday. Please send the updated certificate before the council inspection.",
+    aiSummary:
+      "Customer needs an updated contractor insurance certificate before next Friday for a council inspection.",
+    missingInfo: ["latest certificate file", "inspection date/time"],
+    risks: ["Compliance blocker for customer inspection"],
+    suggestedNextAction: "Schedule certificate chase and notify customer that updated copy is being prepared.",
+    assignedTo: "Ava",
+    tags: ["compliance", "certificate", "inspection"],
+    automationDecision: {
+      mode: "auto_response",
+      confidence: 0.86,
+      threshold: 0.86,
+      channel: "email",
+      reason: "Safe information-gathering template matched the ticket intent and contact preference.",
+      nextStep: "Send the selected approved template and wait for the customer's missing information.",
+      templateId: "tpl-compliance-date-email",
+      templateName: "Compliance date confirmation",
+    },
+  },
+  {
+    id: "tkt-complaint",
+    number: "OD-1028",
+    title: "Complaint about missed maintenance visit",
+    customerName: "Nadia Brooks",
+    customerCompany: "Townsend Dental",
+    customerEmail: "nadia@townsend.example",
+    preferredContactMethod: "email",
+    channel: "email",
+    category: "complaint",
+    priority: "high",
+    status: "awaiting_approval",
+    sentiment: "angry",
+    createdAt: iso(13),
+    updatedAt: iso(3.2),
+    dueAt: due(3),
+    sourceText:
+      "No engineer arrived for the planned maintenance window. We closed two rooms for this and nobody called. This is unacceptable.",
+    aiSummary:
+      "Customer is angry because a planned maintenance visit was missed without notice, causing disruption to two treatment rooms.",
+    missingInfo: ["engineer schedule note", "reason for no-show", "preferred recovery slot"],
+    risks: ["Relationship risk", "Refund or service credit may be requested"],
+    suggestedNextAction: "Approve apologetic response, investigate schedule failure, and offer priority recovery slot.",
+    assignedTo: "Priya",
+    tags: ["complaint", "maintenance", "service-recovery"],
+    automationDecision: {
+      mode: "human_review",
+      confidence: 0.93,
+      threshold: 0.86,
+      channel: "email",
+      reason: "Complaint or angry sentiment requires service recovery review.",
+      nextStep: "Route the response to a human owner before contacting the customer.",
+    },
+    draft: {
+      id: "draft-complaint",
+      body:
+        "Hi Nadia,\n\nI am sorry that no engineer arrived and that you were not contacted during the maintenance window. I understand the disruption this caused, especially after closing two rooms.\n\nWe are checking the scheduling record now. Please send two preferred recovery windows and we will prioritise the visit. I will also confirm what went wrong once we have reviewed the engineer log.\n\nRegards,\nDragonTech Facilities",
+      tone: "apologetic",
+      status: "draft",
+      createdByRunId: "airun-010",
+      updatedAt: iso(3.2),
+      channel: "email",
+      deliveryMode: "approval_required",
+    },
+  },
+];
+
+export const demoFollowUps: FollowUpTask[] = [
+  {
+    id: "fu-cctv",
+    ticketId: "tkt-cctv",
+    title: "Auto-sent site details form; monitor customer response",
+    owner: "Morgan",
+    dueAt: due(6),
+    status: "open",
+    source: "ai_auto_sent",
+  },
+  {
+    id: "fu-wifi",
+    ticketId: "tkt-wifi",
+    title: "Call customer and confirm wired service status",
+    owner: "Priya",
+    dueAt: due(1),
+    status: "open",
+    source: "ai_suggested",
+  },
+  {
+    id: "fu-insurance",
+    ticketId: "tkt-insurance",
+    title: "Send updated contractor insurance certificate",
+    owner: "Ava",
+    dueAt: due(24),
+    status: "open",
+    source: "ai_suggested",
+  },
+  {
+    id: "fu-complaint",
+    ticketId: "tkt-complaint",
+    title: "Investigate missed maintenance schedule entry",
+    owner: "Priya",
+    dueAt: due(3),
+    status: "open",
+    source: "human_created",
+  },
+];
+
+export function createDemoState(): OpsDeskState {
+  return {
+    tickets: structuredClone(demoTickets),
+    aiRuns: structuredClone(demoAiRuns),
+    documents: structuredClone(demoDocuments),
+    followUps: structuredClone(demoFollowUps),
+  };
+}

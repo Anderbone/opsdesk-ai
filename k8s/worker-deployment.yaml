@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opsdesk-ai-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: opsdesk-ai
+      component: worker
+  template:
+    metadata:
+      labels:
+        app: opsdesk-ai
+        component: worker
+    spec:
+      containers:
+        - name: worker
+          image: example.invalid/opsdesk-ai:replace-me
+          imagePullPolicy: IfNotPresent
+          command: ["pnpm", "worker"]
+          envFrom:
+            - configMapRef:
+                name: opsdesk-ai-config
+            - secretRef:
+                name: opsdesk-ai-secrets
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: opsdesk-ai-config
+data:
+  OPS_DESK_MODE: "prod"
+  AI_MODEL: "gpt-4.1-mini"
+  WEBHOOK_OUTBOUND_ENABLED: "false"
+  REDPANDA_BROKERS: "redpanda:9092"
+  OPENSEARCH_URL: "http://opensearch:9200"
+  NEO4J_URI: "bolt://neo4j:7687"

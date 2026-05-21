@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OpsDesk AI — Service Desk Product Blueprint</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#11182e;
+      --panel2:#0f172a;
+      --card:#121a33;
+      --muted:#94a3b8;
+      --text:#e5e7eb;
+      --strong:#ffffff;
+      --line:rgba(148,163,184,.22);
+      --accent:#60a5fa;
+      --accent2:#a78bfa;
+      --accent3:#34d399;
+      --warn:#fbbf24;
+      --bad:#fb7185;
+      --good:#22c55e;
+      --shadow: 0 24px 80px rgba(0,0,0,.35);
+      --radius: 20px;
+      --radius2: 14px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(96,165,250,.26), transparent 28%),
+        radial-gradient(circle at 82% 5%, rgba(167,139,250,.20), transparent 26%),
+        radial-gradient(circle at 55% 92%, rgba(52,211,153,.14), transparent 30%),
+        var(--bg);
+      color:var(--text);
+      line-height:1.55;
+    }
+    a{color:#93c5fd;text-decoration:none}
+    a:hover{text-decoration:underline}
+    .wrap{width:min(1180px, calc(100% - 32px)); margin:0 auto;}
+    .nav{
+      position:sticky; top:0; z-index:20;
+      backdrop-filter: blur(18px);
+      background:rgba(11,16,32,.76);
+      border-bottom:1px solid var(--line);
+    }
+    .nav-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 0;gap:16px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px;color:var(--strong)}
+    .mark{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;box-shadow:0 8px 30px rgba(96,165,250,.32)}
+    .nav-links{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+    .nav-links a{color:var(--muted)}
+    .hero{padding:72px 0 34px}
+    .hero-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:34px;align-items:center}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(96,165,250,.35);color:#bfdbfe;background:rgba(96,165,250,.10);padding:8px 12px;border-radius:999px;font-size:13px;font-weight:700;margin-bottom:18px}
+    h1{font-size:clamp(42px,6vw,72px);line-height:.98;margin:0 0 18px;letter-spacing:-2.2px;color:var(--strong)}
+    .lead{font-size:clamp(18px,2.1vw,22px);color:#cbd5e1;max-width:820px;margin:0 0 22px}
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin:28px 0 0}
+    .btn{display:inline-flex;align-items:center;gap:10px;border-radius:14px;padding:12px 16px;font-weight:800;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--strong);box-shadow:0 10px 30px rgba(0,0,0,.15)}
+    .btn.primary{background:linear-gradient(135deg,#2563eb,#7c3aed);border-color:transparent}
+    .btn:hover{text-decoration:none;transform:translateY(-1px)}
+    .visual-card{background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.035));border:1px solid var(--line);border-radius:28px;padding:20px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+    .visual-card:before{content:"";position:absolute;inset:-2px;background:radial-gradient(circle at 20% 10%,rgba(96,165,250,.18),transparent 30%),radial-gradient(circle at 80% 70%,rgba(52,211,153,.13),transparent 35%);pointer-events:none}
+    .visual-card > *{position:relative}
+    .mini-window{background:#0b1224;border:1px solid rgba(148,163,184,.24);border-radius:18px;overflow:hidden}
+    .window-top{height:44px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;padding:0 14px;background:rgba(255,255,255,.03)}
+    .dot{width:10px;height:10px;border-radius:50%;background:#fb7185}.dot:nth-child(2){background:#fbbf24}.dot:nth-child(3){background:#34d399}
+    .inbox-row{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;padding:14px;border-bottom:1px solid rgba(148,163,184,.13)}
+    .avatar{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,#1d4ed8,#9333ea);display:grid;place-items:center;font-size:14px;font-weight:900}
+    .row-title{font-weight:800;color:#f8fafc;font-size:14px}.row-sub{font-size:12px;color:var(--muted)}
+    .pill{border:1px solid rgba(148,163,184,.24);border-radius:999px;padding:5px 9px;font-size:12px;font-weight:800;color:#dbeafe;background:rgba(96,165,250,.10);white-space:nowrap}.pill.green{color:#bbf7d0;background:rgba(34,197,94,.10)}.pill.yellow{color:#fde68a;background:rgba(251,191,36,.10)}.pill.red{color:#fecdd3;background:rgba(251,113,133,.10)}.pill.purple{color:#ddd6fe;background:rgba(167,139,250,.12)}
+    section{padding:38px 0}
+    .section-title{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:18px}
+    h2{font-size:clamp(30px,4vw,44px);line-height:1.04;margin:0;color:var(--strong);letter-spacing:-1.3px}
+    h3{font-size:22px;margin:0 0 10px;color:var(--strong);letter-spacing:-.4px}
+    h4{font-size:16px;margin:0 0 8px;color:#f8fafc;letter-spacing:-.2px}
+    .sub{color:var(--muted);max-width:760px;margin:8px 0 0}
+    .grid{display:grid;gap:16px}.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .card{background:rgba(17,24,46,.78);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:0 12px 36px rgba(0,0,0,.18)}
+    .card.light{background:rgba(15,23,42,.62)}
+    .card.good{border-color:rgba(34,197,94,.30);background:linear-gradient(180deg,rgba(34,197,94,.10),rgba(17,24,46,.76))}
+    .card.warn{border-color:rgba(251,191,36,.35);background:linear-gradient(180deg,rgba(251,191,36,.11),rgba(17,24,46,.76))}
+    .card.bad{border-color:rgba(251,113,133,.30);background:linear-gradient(180deg,rgba(251,113,133,.10),rgba(17,24,46,.76))}
+    .icon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:rgba(96,165,250,.13);border:1px solid rgba(96,165,250,.25);font-size:22px;margin-bottom:12px}
+    .small{font-size:14px;color:var(--muted)}
+    .callout{background:linear-gradient(135deg,rgba(37,99,235,.20),rgba(124,58,237,.18));border:1px solid rgba(147,197,253,.28);border-radius:24px;padding:22px;box-shadow:0 20px 60px rgba(29,78,216,.14)}
+    .callout strong{color:#fff}
+    .flow{background:rgba(11,18,36,.70);border:1px solid var(--line);border-radius:26px;padding:18px;overflow:auto;box-shadow:var(--shadow)}
+    svg{max-width:100%;height:auto;display:block}
+    .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.legend span{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 9px;background:rgba(255,255,255,.03)}
+    table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:rgba(15,23,42,.62)}
+    th,td{text-align:left;vertical-align:top;padding:13px 14px;border-bottom:1px solid rgba(148,163,184,.16);font-size:14px} th{background:rgba(255,255,255,.05);color:#f8fafc;font-size:13px;text-transform:uppercase;letter-spacing:.06em} tr:last-child td{border-bottom:0} td{color:#cbd5e1}
+    .code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;background:#070b16;border:1px solid rgba(148,163,184,.20);border-radius:16px;padding:16px;color:#dbeafe;overflow:auto;font-size:13px;line-height:1.6;white-space:pre-wrap}
+    .checklist{display:grid;gap:9px;margin:0;padding:0;list-style:none}.checklist li{display:flex;gap:10px;align-items:flex-start;color:#cbd5e1}.checklist li:before{content:"✓";color:#86efac;font-weight:900;line-height:1.45}
+    .number{width:34px;height:34px;border-radius:12px;background:rgba(96,165,250,.14);border:1px solid rgba(96,165,250,.28);display:grid;place-items:center;font-weight:900;color:#bfdbfe;flex:0 0 auto}
+    .steps{display:grid;gap:14px}.step{display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,.035);border:1px solid var(--line);border-radius:18px;padding:16px}
+    .status-strip{display:grid;grid-template-columns:repeat(7,minmax(140px,1fr));gap:10px;overflow:auto}.status{min-height:92px;border:1px solid var(--line);border-radius:18px;padding:14px;background:rgba(255,255,255,.035)}.status b{display:block;color:#fff;margin-bottom:5px}.status span{font-size:12px;color:var(--muted)}
+    .matrix{display:grid;grid-template-columns:1.1fr 1fr 1fr 1fr;gap:12px}.matrix .cell{border:1px solid var(--line);border-radius:16px;padding:14px;background:rgba(255,255,255,.035)}.matrix .head{background:rgba(96,165,250,.11);font-weight:900;color:#fff}.matrix .cell p{margin:6px 0 0;color:var(--muted);font-size:13px}
+    .footer{padding:48px 0 70px;color:var(--muted);border-top:1px solid var(--line);margin-top:40px}
+    .print-note{display:none}
+    @media(max-width:900px){.hero-grid,.grid.two,.grid.three,.grid.four{grid-template-columns:1fr}.matrix{grid-template-columns:1fr}.nav-links{display:none}.hero{padding-top:48px}.section-title{align-items:flex-start;flex-direction:column}}
+    @media print{body{background:white;color:#111827}.nav,.hero-actions{display:none}.card,.callout,.flow,.visual-card{box-shadow:none;background:white;color:#111827;border-color:#d1d5db}.small,.sub,td{color:#374151}h1,h2,h3,h4,.row-title{color:#111827}.print-note{display:block;color:#111827}.footer{border-top:1px solid #d1d5db}.code{background:#f8fafc;color:#111827}}
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="wrap nav-inner">
+      <div class="brand"><div class="mark">◎</div> OpsDesk AI Blueprint</div>
+      <div class="nav-links">
+        <a href="#flow">Flow</a>
+        <a href="#backend">Backend</a>
+        <a href="#ai">AI</a>
+        <a href="#monitoring">AI Watchtower</a>
+        <a href="#build">Build Order</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="eyebrow">AI service desk for local businesses · portfolio demo 1</div>
+        <h1>OpsDesk AI</h1>
+        <p class="lead">One smart inbox that turns emails, website chats, and uploaded documents into tracked tickets, draft replies, quote outlines, reminders, and human-approved actions.</p>
+        <div class="callout">
+          <strong>One-sentence showcase pitch:</strong><br />
+          “I build AI-powered business operation systems that capture enquiries, understand documents, draft replies, prepare quotes, and keep every follow-up visible.”
+        </div>
+        <div class="hero-actions">
+          <a class="btn primary" href="#flow">View data flow →</a>
+          <a class="btn" href="#mvp">MVP scope</a>
+          <a class="btn" href="#monitoring">AI monitoring</a>
+        </div>
+      </div>
+      <div class="visual-card" aria-label="Illustration of an AI service desk inbox">
+        <div class="mini-window">
+          <div class="window-top"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="margin-left:10px;color:#94a3b8;font-size:13px">OpsDesk AI · Live Inbox</span></div>
+          <div class="inbox-row"><div class="avatar">W</div><div><div class="row-title">Warehouse CCTV quote request</div><div class="row-sub">Missing: site size, cameras, deadline</div></div><span class="pill yellow">Needs quote</span></div>
+          <div class="inbox-row"><div class="avatar">IT</div><div><div class="row-title">Office Wi‑Fi keeps dropping</div><div class="row-sub">AI suggests diagnostic checklist</div></div><span class="pill red">Urgent</span></div>
+          <div class="inbox-row"><div class="avatar">PO</div><div><div class="row-title">PO + invoice uploaded</div><div class="row-sub">Mismatch: invoice 24 units, delivery 20</div></div><span class="pill purple">Doc issue</span></div>
+          <div class="inbox-row"><div class="avatar">AI</div><div><div class="row-title">Draft reply ready for review</div><div class="row-sub">Human approval required before sending</div></div><span class="pill green">Safe</span></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="product">
+      <div class="wrap">
+        <div class="section-title">
+          <div>
+            <h2>What the product is</h2>
+            <p class="sub">Not a chatbot. Not a generic upload-to-GPT page. It is a real service desk workflow with AI inside the process.</p>
+          </div>
+        </div>
+        <div class="grid three">
+          <div class="card"><div class="icon">📥</div><h3>Capture work</h3><p class="small">Website enquiries, email-like messages, manual tickets, and uploaded files all become trackable tickets.</p></div>
+          <div class="card"><div class="icon">🧠</div><h3>Understand work</h3><p class="small">AI classifies intent, urgency, customer, missing information, document fields, risks, and suggested next action.</p></div>
+          <div class="card"><div class="icon">✅</div><h3>Control work</h3><p class="small">Staff review drafts, approve replies, create quotes, schedule follow-ups, and see every AI decision in an audit trail.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="flow">
+      <div class="wrap">
+        <div class="section-title">
+          <div>
+            <h2>End-to-end data flow</h2>
+            <p class="sub">Every inbound item is saved first, then processed asynchronously. AI is helpful, but it does not become the source of truth.</p>
+          </div>
+        </div>
+        <div class="flow">
+          <svg viewBox="0 0 1180 620" role="img" aria-label="End to end data flow diagram">
+            <defs>
+              <linearGradient id="g1" x1="0" x2="1"><stop stop-color="#2563eb"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+              <linearGradient id="g2" x1="0" x2="1"><stop stop-color="#059669"/><stop offset="1" stop-color="#22c55e"/></linearGradient>
+              <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity="0.28"/></filter>
+              <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"/></marker>
+            </defs>
+            <rect x="20" y="20" width="1140" height="580" rx="28" fill="#0b1224" stroke="rgba(148,163,184,.22)" />
+            <text x="56" y="68" fill="#fff" font-size="25" font-weight="800">OpsDesk AI: from messy message to controlled business action</text>
+            <text x="56" y="95" fill="#94a3b8" font-size="14">Save raw input → queue processing → AI analysis → human review → approved customer action → follow-up loop</text>
+
+            <!-- Input boxes -->
+            <g filter="url(#shadow)">
+              <rect x="58" y="138" width="190" height="76" rx="18" fill="#11182e" stroke="rgba(96,165,250,.35)"/>
+              <text x="82" y="170" fill="#fff" font-size="17" font-weight="800">Website chat</text>
+              <text x="82" y="193" fill="#94a3b8" font-size="13">Public enquiry widget</text>
+              <rect x="58" y="238" width="190" height="76" rx="18" fill="#11182e" stroke="rgba(96,165,250,.35)"/>
+              <text x="82" y="270" fill="#fff" font-size="17" font-weight="800">Email inbox</text>
+              <text x="82" y="293" fill="#94a3b8" font-size="13">Webhook or manual import</text>
+              <rect x="58" y="338" width="190" height="76" rx="18" fill="#11182e" stroke="rgba(96,165,250,.35)"/>
+              <text x="82" y="370" fill="#fff" font-size="17" font-weight="800">File upload</text>
+              <text x="82" y="393" fill="#94a3b8" font-size="13">PDF, image, DOCX later</text>
+            </g>
+
+            <!-- ingestion -->
+            <path d="M250 176 C286 176 292 248 330 248" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+            <path d="M250 276 C286 276 292 260 330 260" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+            <path d="M250 376 C286 376 292 272 330 272" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+            <g filter="url(#shadow)">
+              <rect x="330" y="190" width="210" height="118" rx="20" fill="url(#g1)"/>
+              <text x="360" y="232" fill="#fff" font-size="19" font-weight="900">React Router</text>
+              <text x="360" y="255" fill="#dbeafe" font-size="14">resource route / action</text>
+              <text x="360" y="279" fill="#dbeafe" font-size="13">validate + normalise input</text>
+            </g>
+
+            <!-- database -->
+            <path d="M540 248 L620 248" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+            <g filter="url(#shadow)">
+              <rect x="620" y="142" width="210" height="116" rx="20" fill="#11182e" stroke="rgba(52,211,153,.38)"/>
+              <text x="650" y="184" fill="#fff" font-size="19" font-weight="900">PostgreSQL</text>
+              <text x="650" y="207" fill="#bbf7d0" font-size="14">Drizzle schema</text>
+              <text x="650" y="231" fill="#94a3b8" font-size="13">raw message + ticket saved</text>
+
+              <rect x="620" y="284" width="210" height="116" rx="20" fill="#11182e" stroke="rgba(251,191,36,.38)"/>
+              <text x="650" y="326" fill="#fff" font-size="19" font-weight="900">pg-boss</text>
+              <text x="650" y="349" fill="#fde68a" font-size="14">background queue</text>
+              <text x="650" y="373" fill="#94a3b8" font-size="13">triage, extract, draft, remind</text>
+            </g>
+            <path d="M540 265 C580 265 580 342 620 342" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+            <path d="M725 258 L725 284" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+            <!-- AI workers -->
+            <path d="M830 342 L900 342" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+            <g filter="url(#shadow)">
+              <rect x="900" y="200" width="210" height="198" rx="22" fill="url(#g2)"/>
+              <text x="930" y="242" fill="#fff" font-size="19" font-weight="900">AI workers</text>
+              <text x="930" y="269" fill="#dcfce7" font-size="13">• classify ticket</text>
+              <text x="930" y="292" fill="#dcfce7" font-size="13">• extract document fields</text>
+              <text x="930" y="315" fill="#dcfce7" font-size="13">• draft reply / quote</text>
+              <text x="930" y="338" fill="#dcfce7" font-size="13">• score confidence</text>
+              <text x="930" y="361" fill="#dcfce7" font-size="13">• write ai_runs log</text>
+            </g>
+            <path d="M1005 398 C1005 455 860 470 798 450" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+            <text x="815" y="485" fill="#94a3b8" font-size="13">AI output returns as suggestions, not final truth</text>
+
+            <!-- UI review -->
+            <g filter="url(#shadow)">
+              <rect x="342" y="438" width="354" height="108" rx="22" fill="#11182e" stroke="rgba(167,139,250,.35)"/>
+              <text x="374" y="480" fill="#fff" font-size="19" font-weight="900">Ticket workspace</text>
+              <text x="374" y="505" fill="#ddd6fe" font-size="14">shadcn UI dashboard</text>
+              <text x="374" y="529" fill="#94a3b8" font-size="13">human approves reply, quote, status, follow-up</text>
+            </g>
+            <path d="M620 400 C590 426 576 438 560 438" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+            <path d="M696 492 L798 492" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+            <g filter="url(#shadow)">
+              <rect x="798" y="446" width="210" height="92" rx="20" fill="#11182e" stroke="rgba(96,165,250,.35)"/>
+              <text x="828" y="485" fill="#fff" font-size="19" font-weight="900">Approved action</text>
+              <text x="828" y="511" fill="#94a3b8" font-size="13">send reply · create quote · schedule task</text>
+            </g>
+            <path d="M903 446 C900 420 850 390 830 370" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+            <text x="896" y="427" fill="#94a3b8" font-size="13">follow-up jobs</text>
+          </svg>
+          <div class="legend"><span>Blue = app routes/actions</span><span>Green = AI worker layer</span><span>Yellow = async queue</span><span>Purple = human review UI</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="backend">
+      <div class="wrap">
+        <div class="section-title">
+          <div>
+            <h2>Backend architecture</h2>
+            <p class="sub">Keep the app portable: React Router framework mode for the full-stack web app, PostgreSQL as source of truth, Drizzle for schema/query code, pg-boss for reliable jobs, AI SDK isolated behind service functions.</p>
+          </div>
+        </div>
+        <div class="grid two">
+          <div class="card">
+            <h3>Layer map</h3>
+            <div class="steps">
+              <div class="step"><div class="number">1</div><div><h4>UI routes</h4><p class="small">Dashboard pages, ticket detail, inbox, settings, AI monitor, public enquiry widget. Loaders read data. Actions mutate data.</p></div></div>
+              <div class="step"><div class="number">2</div><div><h4>Domain services</h4><p class="small">ticketService, messageService, documentService, quoteService, aiService, queueService, auditService. Routes call services instead of touching everything directly.</p></div></div>
+              <div class="step"><div class="number">3</div><div><h4>Persistence</h4><p class="small">PostgreSQL tables defined with Drizzle. Every raw inbound item is saved before AI runs. AI outputs are stored as suggestions and logs.</p></div></div>
+              <div class="step"><div class="number">4</div><div><h4>Workers</h4><p class="small">Separate Node worker process handles triage, document extraction, reply drafts, quote drafts, reminders, notifications, and eval checks.</p></div></div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Suggested folder structure</h3>
+            <div class="code">app/
+  routes/
+    _marketing.tsx
+    demo.widget.tsx
+    dashboard._index.tsx
+    dashboard.tickets._index.tsx
+    dashboard.tickets.$ticketId.tsx
+    dashboard.ai-runs._index.tsx
+    dashboard.settings.tsx
+    api.inbound.email.ts
+    api.files.upload.ts
+  components/
+    ui/                 # shadcn/ui components
+    tickets/
+    ai/
+  services/
+    tickets.server.ts
+    messages.server.ts
+    documents.server.ts
+    quotes.server.ts
+    ai.server.ts
+    queue.server.ts
+    audit.server.ts
+  db/
+    schema.ts
+    migrations/
+workers/
+  boss.ts
+  jobs/
+    ticket-triage.ts
+    document-extract.ts
+    draft-reply.ts
+    draft-quote.ts
+    send-notification.ts
+    stale-ticket.ts</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="mvp">
+      <div class="wrap">
+        <div class="section-title">
+          <div>
+            <h2>MVP scope that still feels impressive</h2>
+            <p class="sub">Build enough to look like a real business app, but avoid becoming an enterprise helpdesk clone.</p>
+          </div>
+        </div>
+        <div class="grid three">
+          <div class="card good"><h3>Must build</h3><ul class="checklist"><li>Public enquiry widget</li><li>Manual/email-like inbox import</li><li>Ticket board and ticket detail</li><li>AI triage, summary, urgency, missing info</li><li>Draft reply with approval button</li><li>Document upload and extraction for 2–3 demo doc types</li><li>Follow-up reminders through pg-boss</li><li>AI run log and prompt/version tracking</li></ul></div>
+          <div class="card warn"><h3>Nice for demo</h3><ul class="checklist"><li>Quote outline builder</li><li>PDF quote/report generation</li><li>Customer timeline view</li><li>Saved reply templates</li><li>Demo seed data for Wrexham-style businesses</li><li>Simple cost/token dashboard</li></ul></div>
+          <div class="card bad"><h3>Do not build first</h3><ul class="checklist"><li>Full Gmail/Outlook sync</li><li>WhatsApp integration</li><li>Accounting integration</li><li>Complex SLA engine</li><li>Full CRM</li><li>Multi-tenant billing</li><li>Custom model fine-tuning</li></ul></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="lifecycle">
+      <div class="wrap">
+        <div class="section-title"><div><h2>Ticket lifecycle</h2><p class="sub">Simple statuses make the demo understandable. Each status has clear AI and human responsibilities.</p></div></div>
+        <div class="status-strip">
+          <div class="status"><b>New</b><span>Raw message saved. No AI result yet.</span></div>
+          <div class="status"><b>Triage pending</b><span>pg-boss job queued or running.</span></div>
+          <div class="status"><b>Needs review</b><span>AI summary and draft ready. Human checks it.</span></div>
+          <div class="status"><b>Waiting customer</b><span>Approved reply sent or manually marked sent.</span></div>
+          <div class="status"><b>Needs quote</b><span>Quote outline ready. Staff edits details.</span></div>
+          <div class="status"><b>In progress</b><span>Business accepted; work is active.</span></div>
+          <div class="status"><b>Resolved</b><span>Human closes. AI can suggest closure only.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="db">
+      <div class="wrap">
+        <div class="section-title"><div><h2>PostgreSQL + Drizzle data model</h2><p class="sub">Store both business state and AI state. This is what makes the app serious, inspectable, and reliable.</p></div></div>
+        <table>
+          <thead><tr><th>Table</th><th>Purpose</th><th>Important fields</th><th>Why it matters</th></tr></thead>
+          <tbody>
+            <tr><td><b>organisations</b></td><td>Each business using the system.</td><td>name, industry, settings, default_ai_policy</td><td>Lets you demo different business types later.</td></tr>
+            <tr><td><b>users</b></td><td>Staff accounts.</td><td>role, email, organisation_id</td><td>Needed for approvals and audit logs.</td></tr>
+            <tr><td><b>contacts</b></td><td>Customers or suppliers.</td><td>name, company, email, phone, notes</td><td>Keeps customer context separate from tickets.</td></tr>
+            <tr><td><b>channels</b></td><td>Where messages come from.</td><td>type, display_name, config_json</td><td>Website, email import, manual, later WhatsApp.</td></tr>
+            <tr><td><b>tickets</b></td><td>Main work item.</td><td>status, category, priority, confidence, owner_id, due_at</td><td>The centre of the product.</td></tr>
+            <tr><td><b>messages</b></td><td>Thread history.</td><td>direction, body, from, to, received_at</td><td>AI summarises thread; humans see timeline.</td></tr>
+            <tr><td><b>attachments</b></td><td>Uploaded files.</td><td>file_url, mime_type, checksum, ticket_id</td><td>Documents are linked to tickets.</td></tr>
+            <tr><td><b>document_extractions</b></td><td>AI extracted document fields.</td><td>doc_type, fields_json, confidence, needs_review</td><td>Turns file upload into structured business data.</td></tr>
+            <tr><td><b>tasks</b></td><td>Follow-ups and internal work.</td><td>type, due_at, status, assigned_to</td><td>Prevents forgotten replies.</td></tr>
+            <tr><td><b>quotes</b></td><td>Quote drafts and versions.</td><td>status, scope_json, line_items_json, approved_by</td><td>AI drafts; human finalises.</td></tr>
+            <tr><td><b>ai_runs</b></td><td>Every model call.</td><td>task, model, prompt_version, input_hash, output_json, tokens, latency, cost, status</td><td>Your AI watchtower. Debug, cost, quality, safety.</td></tr>
+            <tr><td><b>ai_feedback</b></td><td>Human judgement on AI outputs.</td><td>ai_run_id, rating, correction_json, reason</td><td>Builds eval data and improves prompts.</td></tr>
+            <tr><td><b>audit_logs</b></td><td>Who changed what.</td><td>actor, action, entity, before_json, after_json</td><td>Trust, accountability, client confidence.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="jobs">
+      <div class="wrap">
+        <div class="section-title"><div><h2>pg-boss job design</h2><p class="sub">Use the queue for anything slow, retryable, scheduled, or important to audit.</p></div></div>
+        <div class="grid two">
+          <div class="card">
+            <h3>Core job list</h3>
+            <table>
+              <thead><tr><th>Job</th><th>When triggered</th><th>Output</th></tr></thead>
+              <tbody>
+                <tr><td><b>ticket.triage</b></td><td>New message/ticket created</td><td>category, priority, summary, missing info</td></tr>
+                <tr><td><b>document.extract</b></td><td>File uploaded</td><td>doc type, fields, expiry dates, mismatches</td></tr>
+                <tr><td><b>reply.draft</b></td><td>After triage or on button click</td><td>draft reply saved for approval</td></tr>
+                <tr><td><b>quote.draft</b></td><td>Ticket classified as sales/quote</td><td>quote scope and line item suggestions</td></tr>
+                <tr><td><b>followup.schedule</b></td><td>Approved reply or waiting state</td><td>task due in future</td></tr>
+                <tr><td><b>ticket.stale_check</b></td><td>Scheduled recurring job</td><td>marks overdue or escalates</td></tr>
+                <tr><td><b>notification.send</b></td><td>Human-approved send</td><td>email/log entry; retries on failure</td></tr>
+                <tr><td><b>ai.eval_sample</b></td><td>Nightly/manual</td><td>quality score against test cases</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <h3>Reliability rules</h3>
+            <ul class="checklist">
+              <li><b>Idempotency key:</b> each job uses ticketId + task + version to avoid duplicate work.</li>
+              <li><b>Retries:</b> retry AI/network failures; do not retry invalid schema forever.</li>
+              <li><b>Dead letter:</b> failed jobs are visible in admin UI with “retry” and “mark manual”.</li>
+              <li><b>Job status reflected in UI:</b> ticket shows “AI triage running”, “document extraction failed”, etc.</li>
+              <li><b>Small payload:</b> job payload contains IDs, not huge text. Workers fetch fresh data from Postgres.</li>
+              <li><b>Audit every final action:</b> sending, status change, quote approval, and manual override.</li>
+            </ul>
+            <div class="code">// Job payload pattern
+{
+  jobName: "ticket.triage",
+  ticketId: "tck_123",
+  organisationId: "org_001",
+  promptVersion: "triage.v1",
+  requestedBy: "system",
+  idempotencyKey: "tck_123:triage:v1"
+}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="ai">
+      <div class="wrap">
+        <div class="section-title"><div><h2>Where AI works</h2><p class="sub">AI should act like a junior operations assistant: fast at reading, drafting, and organising; never allowed to silently take risky final actions.</p></div></div>
+        <div class="matrix">
+          <div class="cell head">AI task</div><div class="cell head">Input</div><div class="cell head">Output</div><div class="cell head">Human control</div>
+          <div class="cell"><b>Triage</b><p>Classify new ticket.</p></div><div class="cell">Message body, sender, attachments metadata, organisation profile.</div><div class="cell">category, priority, summary, missing_info, confidence.</div><div class="cell">Human can edit category, priority, summary.</div>
+          <div class="cell"><b>Draft reply</b><p>Prepare response.</p></div><div class="cell">Ticket summary, messages, missing info, tone settings.</div><div class="cell">reply draft + reason + suggested next status.</div><div class="cell">Must approve before sending.</div>
+          <div class="cell"><b>Document extraction</b><p>Read uploaded files.</p></div><div class="cell">PDF/image text, ticket context, expected schema.</div><div class="cell">structured fields, dates, mismatch warnings.</div><div class="cell">Low confidence fields marked review.</div>
+          <div class="cell"><b>Quote outline</b><p>Turn enquiry into quote skeleton.</p></div><div class="cell">Requirements, business service catalogue, price rules if available.</div><div class="cell">scope, assumptions, exclusions, line item suggestions.</div><div class="cell">Human edits price and approves final quote.</div>
+          <div class="cell"><b>Summarise thread</b><p>Reduce long conversations.</p></div><div class="cell">All ticket messages and notes.</div><div class="cell">latest summary and decision log.</div><div class="cell">Human can pin or correct summary.</div>
+          <div class="cell"><b>Risk detection</b><p>Flag issues.</p></div><div class="cell">Message + docs + previous state.</div><div class="cell">expired docs, missing address, urgent complaint, invoice mismatch.</div><div class="cell">Human decides final action.</div>
+        </div>
+
+        <div class="grid two" style="margin-top:18px">
+          <div class="card">
+            <h3>AI service contract</h3>
+            <p class="small">Every AI function should return structured JSON, not only plain text. Validate with Zod before saving business fields.</p>
+            <div class="code">type TicketTriage = {
+  category: "sales" | "support" | "billing" | "document" | "complaint" | "other";
+  priority: "low" | "medium" | "high" | "urgent";
+  summary: string;
+  missingInfo: string[];
+  suggestedNextAction: string;
+  confidence: number; // 0 to 1
+  needsHumanReview: boolean;
+};</div>
+          </div>
+          <div class="card">
+            <h3>Hard AI boundaries</h3>
+            <ul class="checklist">
+              <li>AI can draft a reply; it cannot send without approval.</li>
+              <li>AI can suggest quote line items; it cannot finalise price.</li>
+              <li>AI can suggest “resolved”; it cannot close the ticket alone.</li>
+              <li>AI can extract dates and amounts; low-confidence fields require review.</li>
+              <li>AI output must be linked to model, prompt version, source messages, and user approval status.</li>
+              <li>AI should show “why” in short business language, not hidden chain-of-thought.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="monitoring">
+      <div class="wrap">
+        <div class="section-title"><div><h2>AI Watchtower: how to keep an eye on AI</h2><p class="sub">This is the part that makes the demo look professional: you are not just adding AI, you are managing AI behaviour.</p></div></div>
+        <div class="flow">
+          <svg viewBox="0 0 1180 500" role="img" aria-label="AI monitoring flow diagram">
+            <defs>
+              <marker id="arrow2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"/></marker>
+              <linearGradient id="watch" x1="0" x2="1"><stop stop-color="#7c3aed"/><stop offset="1" stop-color="#2563eb"/></linearGradient>
+            </defs>
+            <rect x="20" y="20" width="1140" height="460" rx="28" fill="#0b1224" stroke="rgba(148,163,184,.22)"/>
+            <text x="56" y="70" fill="#fff" font-size="25" font-weight="800">AI Watchtower loop</text>
+            <text x="56" y="98" fill="#94a3b8" font-size="14">Trace every AI run → validate → show in dashboard → collect feedback → improve prompt/evals</text>
+            <g>
+              <rect x="66" y="160" width="180" height="110" rx="20" fill="#11182e" stroke="rgba(96,165,250,.35)"/>
+              <text x="96" y="198" fill="#fff" font-size="18" font-weight="900">AI run</text>
+              <text x="96" y="225" fill="#94a3b8" font-size="13">prompt + model + input</text>
+              <text x="96" y="248" fill="#94a3b8" font-size="13">output + latency + cost</text>
+              <path d="M246 215 L316 215" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrow2)"/>
+              <rect x="316" y="160" width="180" height="110" rx="20" fill="#11182e" stroke="rgba(52,211,153,.35)"/>
+              <text x="346" y="198" fill="#fff" font-size="18" font-weight="900">Validate</text>
+              <text x="346" y="225" fill="#94a3b8" font-size="13">Zod schema</text>
+              <text x="346" y="248" fill="#94a3b8" font-size="13">confidence threshold</text>
+              <path d="M496 215 L566 215" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrow2)"/>
+              <rect x="566" y="160" width="180" height="110" rx="20" fill="#11182e" stroke="rgba(167,139,250,.35)"/>
+              <text x="596" y="198" fill="#fff" font-size="18" font-weight="900">Review UI</text>
+              <text x="596" y="225" fill="#94a3b8" font-size="13">approve / edit / reject</text>
+              <text x="596" y="248" fill="#94a3b8" font-size="13">show sources used</text>
+              <path d="M746 215 L816 215" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrow2)"/>
+              <rect x="816" y="160" width="180" height="110" rx="20" fill="#11182e" stroke="rgba(251,191,36,.35)"/>
+              <text x="846" y="198" fill="#fff" font-size="18" font-weight="900">Feedback</text>
+              <text x="846" y="225" fill="#94a3b8" font-size="13">rating + correction</text>
+              <text x="846" y="248" fill="#94a3b8" font-size="13">added to eval set</text>
+            </g>
+            <path d="M906 270 C900 355 200 355 156 270" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrow2)"/>
+            <rect x="330" y="338" width="420" height="74" rx="22" fill="url(#watch)"/>
+            <text x="370" y="383" fill="#fff" font-size="19" font-weight="900">Prompt/version improvement, not blind trust</text>
+          </svg>
+        </div>
+        <div class="grid four" style="margin-top:18px">
+          <div class="card"><div class="icon">📊</div><h3>Run dashboard</h3><p class="small">Filter by model, task, success/failure, latency, tokens, estimated cost, schema errors, confidence.</p></div>
+          <div class="card"><div class="icon">🧪</div><h3>Eval set</h3><p class="small">Keep 30–50 saved demo cases with expected category, urgency, missing info, and document fields.</p></div>
+          <div class="card"><div class="icon">🛡️</div><h3>Safety gates</h3><p class="small">No external email, final quote, ticket closure, or customer-impacting change without explicit human approval.</p></div>
+          <div class="card"><div class="icon">📝</div><h3>Correction loop</h3><p class="small">When a user edits an AI draft, save the diff. This becomes improvement data and portfolio evidence.</p></div>
+        </div>
+        <div class="card" style="margin-top:18px">
+          <h3>AI run record example</h3>
+          <div class="code">ai_runs
+- id: airun_789
+- task: ticket.triage
+- ticket_id: tck_123
+- model: selected-model-name
+- prompt_version: triage.v1
+- input_hash: sha256(...)
+- output_json: { category, priority, summary, missingInfo, confidence }
+- schema_valid: true
+- confidence: 0.82
+- latency_ms: 1840
+- input_tokens / output_tokens / estimated_cost
+- status: completed
+- approved_by: null
+- feedback_rating: null
+- created_at: timestamp</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="routes">
+      <div class="wrap">
+        <div class="section-title"><div><h2>Route and screen plan</h2><p class="sub">These pages are enough for a polished yanjiyu.com showcase.</p></div></div>
+        <div class="grid two">
+          <div class="card">
+            <h3>Public/demo screens</h3>
+            <table>
+              <thead><tr><th>Route</th><th>Purpose</th></tr></thead>
+              <tbody>
+                <tr><td><b>/</b></td><td>Marketing landing page for OpsDesk AI.</td></tr>
+                <tr><td><b>/demo</b></td><td>Interactive fake business demo with sample messages.</td></tr>
+                <tr><td><b>/demo/widget</b></td><td>Public enquiry widget embedded in a fake company page.</td></tr>
+                <tr><td><b>/case-study</b></td><td>Before/after workflow explanation for your portfolio.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <h3>App screens</h3>
+            <table>
+              <thead><tr><th>Route</th><th>Purpose</th></tr></thead>
+              <tbody>
+                <tr><td><b>/dashboard</b></td><td>KPIs: new tickets, overdue, AI drafts, failed jobs.</td></tr>
+                <tr><td><b>/dashboard/tickets</b></td><td>Ticket list/board with filters.</td></tr>
+                <tr><td><b>/dashboard/tickets/:id</b></td><td>Timeline, AI panel, reply editor, docs, quote outline.</td></tr>
+                <tr><td><b>/dashboard/ai-runs</b></td><td>AI Watchtower logs and feedback.</td></tr>
+                <tr><td><b>/dashboard/jobs</b></td><td>pg-boss job status, failures, retry buttons.</td></tr>
+                <tr><td><b>/dashboard/settings</b></td><td>Tone, company profile, approval policy, templates.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="demo-script">
+      <div class="wrap">
+        <div class="section-title"><div><h2>Demo story to show clients</h2><p class="sub">Use one fake local business and run several real-world messages through the system.</p></div></div>
+        <div class="grid three">
+          <div class="card"><h3>Fake company</h3><p class="small"><b>DragonTech Facilities</b>: small IT/support/facilities provider serving local warehouses, offices, hotels, and shops.</p></div>
+          <div class="card"><h3>Inbound examples</h3><ul class="checklist"><li>CCTV quote request</li><li>Office Wi‑Fi support issue</li><li>Invoice/delivery note mismatch</li><li>Insurance certificate expiry</li><li>Customer complaint</li></ul></div>
+          <div class="card"><h3>What visitor sees</h3><ul class="checklist"><li>AI creates tickets instantly</li><li>Draft replies appear</li><li>Documents become structured fields</li><li>Follow-up tasks are scheduled</li><li>AI monitoring proves control</li></ul></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="build">
+      <div class="wrap">
+        <div class="section-title"><div><h2>Build order</h2><p class="sub">A practical sequence that avoids scope creep. Each phase should leave you with something demoable.</p></div></div>
+        <div class="steps">
+          <div class="step"><div class="number">A</div><div><h3>Foundation</h3><p class="small">React Router framework app, shadcn layout, auth placeholder, Drizzle schema, seed demo organisation, tickets, contacts, messages.</p></div></div>
+          <div class="step"><div class="number">B</div><div><h3>Ticket system</h3><p class="small">Ticket board, ticket detail, timeline, manual message entry, status changes, audit logs.</p></div></div>
+          <div class="step"><div class="number">C</div><div><h3>Inbound widget</h3><p class="small">Public enquiry form writes message + ticket, enqueues ticket.triage, shows “received” confirmation.</p></div></div>
+          <div class="step"><div class="number">D</div><div><h3>AI triage and drafts</h3><p class="small">AI SDK service functions for classify/summarise/missing info/draft reply. Store all calls in ai_runs.</p></div></div>
+          <div class="step"><div class="number">E</div><div><h3>pg-boss workers</h3><p class="small">Run triage/draft/retry/stale-check jobs outside request-response. Add jobs dashboard.</p></div></div>
+          <div class="step"><div class="number">F</div><div><h3>Document extraction</h3><p class="small">Support 2–3 document types first: quote request, invoice/delivery note, certificate/expiry document.</p></div></div>
+          <div class="step"><div class="number">G</div><div><h3>AI Watchtower</h3><p class="small">Add AI run filters, confidence warnings, prompt version view, approve/edit/reject feedback, eval sample cases.</p></div></div>
+          <div class="step"><div class="number">H</div><div><h3>Portfolio polish</h3><p class="small">Marketing page, case study, seed data reset button, demo script, screenshots, architecture page.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="decisions">
+      <div class="wrap">
+        <div class="section-title"><div><h2>Important product decisions</h2><p class="sub">These decisions keep the app useful, impressive, and buildable.</p></div></div>
+        <div class="grid two">
+          <div class="card"><h3>Use Postgres as the source of truth</h3><p class="small">Tickets, messages, AI runs, job outcomes, corrections, and approvals should all be inspectable. Avoid hiding important state inside model prompts or temporary memory.</p></div>
+          <div class="card"><h3>Keep AI behind service functions</h3><p class="small">Routes and workers call ai.server.ts functions. This lets you swap model/provider, version prompts, run tests, and record every call consistently.</p></div>
+          <div class="card"><h3>Start with fake email import</h3><p class="small">A realistic “email inbox” demo can be seeded or webhook-based first. Real Gmail/Outlook integration can come later.</p></div>
+          <div class="card"><h3>Make approvals the main safety feature</h3><p class="small">Clients trust systems that show control. Human approval makes the AI useful without being scary.</p></div>
+          <div class="card"><h3>Make failed jobs visible</h3><p class="small">A hidden failed AI job looks broken. A visible failed job with retry/manual options looks professional.</p></div>
+          <div class="card"><h3>Measure edits, not only likes</h3><p class="small">If staff edit an AI reply heavily, the AI was not good enough. Save that signal in ai_feedback.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="acceptance">
+      <div class="wrap">
+        <div class="section-title"><div><h2>Demo acceptance checklist</h2><p class="sub">When these are true, the app is strong enough to showcase.</p></div></div>
+        <div class="grid two">
+          <div class="card good"><h3>Business demo checklist</h3><ul class="checklist"><li>A new enquiry becomes a ticket.</li><li>AI summary, category, priority, and missing information appear.</li><li>A draft reply can be edited and approved.</li><li>A document upload becomes structured extracted fields.</li><li>A follow-up reminder is scheduled automatically.</li><li>The ticket timeline clearly shows what happened.</li></ul></div>
+          <div class="card good"><h3>Engineering demo checklist</h3><ul class="checklist"><li>Every AI call is logged in ai_runs.</li><li>Every background job is visible or auditable.</li><li>AI output is schema validated before saving.</li><li>Failed AI/job states are visible in the UI.</li><li>Prompt versions are stored with outputs.</li><li>Human approval is required for external actions.</li></ul></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <h2>Portfolio message</h2>
+      <p class="lead" style="max-width:940px">OpsDesk AI shows that you can build more than a website: you can design a full AI-enabled business workflow with data, background jobs, human approval, observability, and a polished dashboard.</p>
+      <p class="print-note">Print tip: this page is print-friendly. Use browser print to export as PDF.</p>
+      <p class="small">Prepared as a product/architecture blueprint for yanjiyu.com.</p>
+    </div>
+  </footer>
+</body>
+</html>
