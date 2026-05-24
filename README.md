@@ -2,6 +2,8 @@
 
 AI service desk demo for local businesses. The app turns incoming enquiries and uploaded document notes into structured tickets, AI triage, retrieval-aware draft replies, follow-up tasks, reusable agent blueprints, and an auditable AI Watchtower.
 
+**Live demo:** [opsdesk-ai.netlify.app](https://opsdesk-ai.netlify.app/)
+
 ## Demo Story
 
 The seeded business is **DragonTech Facilities**. The app includes five realistic cases:

@@ -13,6 +13,7 @@ import {
   Bot,
   FileText,
   Gauge,
+  Github,
   Home,
   Inbox,
   Network,
@@ -114,6 +115,16 @@ export default function App() {
             <span>Approved templates can auto-send; risky cases queue for review.</span>
           </div>
         </div>
+
+        <a
+          className="sidebar-source"
+          href="https://github.com/Anderbone/opsdesk-ai"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <Github size={16} />
+          <span>View source</span>
+        </a>
       </aside>
 
       <div className="main-region">

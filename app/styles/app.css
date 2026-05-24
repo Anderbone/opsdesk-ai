@@ -166,6 +166,28 @@ select {
   margin-top: 3px;
 }
 
+.sidebar-source {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 10px;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.035);
+  font-size: 12px;
+  font-weight: 800;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.sidebar-source:hover {
+  color: var(--text);
+  border-color: var(--line-strong);
+  background: rgba(255, 255, 255, 0.07);
+}
+
 .main-region {
   min-width: 0;
 }
@@ -2401,6 +2423,10 @@ select {
 
   .sidebar-status {
     display: none;
+  }
+
+  .sidebar-source {
+    min-width: max-content;
   }
 
   .ticket-row {
