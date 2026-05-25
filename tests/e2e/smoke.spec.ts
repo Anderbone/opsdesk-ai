@@ -44,8 +44,19 @@ test("agent delivery and architecture routes render", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /client challenge to production ai agent/i })).toBeVisible();
 
   await page.goto("/architecture");
-  await expect(page.getByRole("heading", { name: /architecture that keeps ai accountable/i })).toBeVisible();
-  await expect(page.getByText("Background job contract")).toBeVisible();
+  await expect(page.getByRole("heading", { name: /follow one wi-fi incident through the stack/i })).toBeVisible();
+  await expect(page.getByText("Worker contract")).toBeVisible();
+});
+
+test("case study shows media, architecture, and audit story", async ({ page }) => {
+  await page.goto("/case-study");
+
+  await expect(page.getByRole("heading", { name: /^opsdesk ai$/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /if you only have a few minutes/i })).toBeVisible();
+  await expect(page.getByLabel("Solution, role, and tradeoffs")).toContainText("My role");
+  await expect(page.getByText("Screenshots and GIF")).toBeVisible();
+  await expect(page.getByLabel("OpsDesk AI architecture diagram")).toContainText("Watchtower");
+  await expect(page.getByText("AI can prepare work. Humans own risk.")).toBeVisible();
 });
 
 test("platform route renders production path and contract map", async ({ page }) => {

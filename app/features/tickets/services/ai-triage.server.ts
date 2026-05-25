@@ -1,11 +1,10 @@
-import { createHash, randomUUID } from "node:crypto";
 import {
   renderResponseTemplate,
   selectResponseTemplate,
 } from "./response-templates";
 import type { AutomationDecision, Ticket, TicketCategory, TicketPriority } from "~/features/tickets/domain/types";
-import { runtimeConfig } from "~/shared/config/runtime";
 import type { AiRun } from "~/shared/domain/ai-run";
+import { createDemoAiRun } from "~/shared/domain/ai-run.server";
 
 const AUTO_RESPONSE_CONFIDENCE_THRESHOLD = 0.86;
 
@@ -19,10 +18,6 @@ type TriageResult = {
   suggestedNextAction: string;
   tags: string[];
 };
-
-function hashInput(input: string) {
-  return `sha256:${createHash("sha256").update(input).digest("hex").slice(0, 12)}`;
-}
 
 function hasAny(text: string, terms: string[]) {
   const lower = text.toLowerCase();
@@ -95,7 +90,13 @@ export function triageMessage(input: {
 
   return {
     result,
-    run: makeRun("ticket.triage", "not_required", text, result, confidenceFor(priority, category)),
+    run: createDemoAiRun({
+      action: "ticket.triage",
+      approvalStatus: "not_required",
+      input: text,
+      output: result,
+      confidence: confidenceFor(priority, category),
+    }),
   };
 }
 
@@ -123,18 +124,18 @@ export function draftReply(ticket: Ticket, triageConfidence = 0.83): { body: str
 
   return {
     body,
-    run: makeRun(
-      "response.template_select",
-      canAutoRespond ? "not_required" : "pending",
-      `${ticket.id}:${ticket.sourceText}:${ticket.updatedAt}`,
-      {
+    run: createDemoAiRun({
+      action: "response.template_select",
+      approvalStatus: canAutoRespond ? "not_required" : "pending",
+      input: `${ticket.id}:${ticket.sourceText}:${ticket.updatedAt}`,
+      output: {
         decision,
         templateId: template?.id ?? null,
         templateName: template?.name ?? null,
         requiredInfo: template?.requiredInfo ?? ticket.missingInfo.slice(0, 3),
       },
-      canAutoRespond ? triageConfidence : Math.min(triageConfidence, 0.84),
-    ),
+      confidence: canAutoRespond ? triageConfidence : Math.min(triageConfidence, 0.84),
+    }),
     decision,
   };
 }
@@ -173,32 +174,4 @@ function confidenceFor(priority: TicketPriority, category: TicketCategory) {
   if (priority === "urgent") return 0.91;
   if (category === "document_issue") return 0.79;
   return 0.86;
-}
-
-function makeRun(
-  action: AiRun["action"],
-  approvalStatus: AiRun["approvalStatus"],
-  input: string,
-  output: Record<string, unknown>,
-  confidence: number,
-): AiRun {
-  const promptTokens = Math.max(320, Math.round(input.length * 1.7));
-  const completionTokens = Math.max(140, Math.round(JSON.stringify(output).length * 1.2));
-  return {
-    id: `airun-${randomUUID().slice(0, 8)}`,
-    ticketId: "",
-    action,
-    model: runtimeConfig.aiModel,
-    promptVersion: `${action}-2026-05-20`,
-    inputHash: hashInput(input),
-    confidence,
-    latencyMs: 500 + Math.round(Math.random() * 900),
-    promptTokens,
-    completionTokens,
-    estimatedCostUsd: Number(((promptTokens + completionTokens) * 0.000003).toFixed(4)),
-    validationStatus: confidence < 0.8 ? "needs_review" : "valid",
-    approvalStatus,
-    createdAt: new Date().toISOString(),
-    output,
-  };
 }

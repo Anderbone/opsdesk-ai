@@ -1,8 +1,29 @@
 # OpsDesk AI
 
-AI service desk demo for local businesses. The app turns incoming enquiries and uploaded document notes into structured tickets, AI triage, retrieval-aware draft replies, follow-up tasks, reusable agent blueprints, and an auditable AI Watchtower.
+OpsDesk AI is a full-stack, policy-gated AI workflow demo that turns messy service enquiries into structured tickets, retrieval-aware drafts, human approval gates, audit trails, and production-ready integration boundaries.
 
 **Live demo:** [opsdesk-ai.netlify.app](https://opsdesk-ai.netlify.app/)
+
+## For Hiring Reviewers
+
+If you only have a few minutes:
+
+1. `/case-study` - business problem, product story, AI boundary, and architecture summary.
+2. `/enquiry` - submit a messy customer enquiry and trigger AI triage.
+3. `/dashboard` and `/tickets/:ticketId` - inspect ticket state, draft response, follow-ups, and policy decisions.
+4. `/watchtower` - review prompt/model metadata, validation, audit events, cost, latency, and approval status.
+5. `/platform` and `/architecture` - see how the hosted demo maps to Postgres, pgvector, queues, webhooks, observability, search, and graph boundaries.
+
+The `/case-study` route includes product screenshots, a short animated workflow GIF, an inline architecture diagram, DragonTech case-study metrics, and an explicit AI workflow, human-review, and audit-trail narrative.
+
+Visual assets are committed under `public/showcase/`:
+
+- `dashboard.png` - service desk screenshot
+- `watchtower.png` - AI audit screenshot
+- `architecture.png` - architecture route screenshot
+- `opsdesk-flow.gif` - short dashboard to ticket to Watchtower walkthrough
+
+This project reflects the same implementation pattern I use in enterprise software delivery: understand the real operational workflow, protect data integrity, automate the repeatable path, keep exceptions reviewable, and design the result so it can be demoed, supported, and extended.
 
 ## Demo Story
 
@@ -129,7 +150,7 @@ Demo implementations are deterministic and credential-free. Local/prod factories
 
 Terraform skeletons live in `infra/terraform/` and are safe to inspect only; they do not configure providers, account IDs, remote state, or deployable resources. Kubernetes manifests live in `k8s/` and document a future web/worker deployment shape. They are not part of required verification, and the Kubernetes path requires real health endpoints before apply.
 
-## Hiring Reviewer Map
+## Route Map
 
 - Product workflow: `/dashboard`, `/enquiry`, and `/tickets/:ticketId` show intake, triage, drafts, document extraction, and follow-ups.
 - AI safety/evaluation: `/watchtower` shows prompt versions, validation status, approval gates, costs, and demo trace details.
