@@ -1396,6 +1396,35 @@ select {
   margin-top: 22px;
 }
 
+.policy-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.policy-list article {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.policy-list strong,
+.policy-list span {
+  display: block;
+}
+
+.policy-list strong {
+  font-size: 13px;
+}
+
+.policy-list span {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.48;
+}
+
 .review-ledger {
   display: grid;
   gap: 1px;

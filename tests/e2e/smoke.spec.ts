@@ -35,7 +35,7 @@ test("watchtower shows AI run metrics", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /every ai action is visible/i })).toBeVisible();
   await expect(page.getByLabel("AI run metrics")).toContainText("AI runs");
   await expect(page.getByLabel("Demo trace view")).toContainText("CCTV quote auto-response");
-  await expect(page.getByText(/OpenTelemetry exporter path/i)).toBeVisible();
+  await expect(page.getByText(/OTLP\/JSON payloads/i)).toBeVisible();
   await expect(page.getByRole("table")).toContainText("document.extract");
 });
 
@@ -55,6 +55,10 @@ test("case study shows media, architecture, and audit story", async ({ page }) =
   await expect(page.getByRole("heading", { name: /if you only have a few minutes/i })).toBeVisible();
   await expect(page.getByLabel("Solution, role, and tradeoffs")).toContainText("My role");
   await expect(page.getByText("Screenshots and GIF")).toBeVisible();
+  await expect(page.getByText("Workflow and data model")).toBeVisible();
+  await expect(page.getByText("Full-stack implementation proof")).toBeVisible();
+  await expect(page.getByLabel("AI policy boundary")).toContainText("Queued for review");
+  await expect(page.getByText("Production next")).toBeVisible();
   await expect(page.getByLabel("OpsDesk AI architecture diagram")).toContainText("Watchtower");
   await expect(page.getByText("AI can prepare work. Humans own risk.")).toBeVisible();
 });
@@ -64,6 +68,7 @@ test("platform route renders production path and contract map", async ({ page })
 
   await expect(page.getByRole("heading", { name: /hosted demo today, production path tomorrow/i })).toBeVisible();
   await expect(page.getByText("Serverless AWS path")).toBeVisible();
+  await expect(page.getByText("Production next is tracked as implementation work.")).toBeVisible();
   await expect(page.getByText("ticket.lifecycle.v2")).toBeVisible();
 });
 

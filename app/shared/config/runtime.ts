@@ -10,6 +10,10 @@ export type RuntimeConfig = {
   neo4jUri?: string;
   neo4jUser?: string;
   neo4jPassword?: string;
+  otelServiceName: string;
+  otelExporterOtlpEndpoint?: string;
+  otelExporterOtlpTracesEndpoint?: string;
+  otelExporterOtlpHeaders: Record<string, string>;
   webhookOutboundEnabled: boolean;
   missingDependencies: string[];
 };
@@ -34,6 +38,22 @@ function requiredDependencies(mode: OpsDeskMode, env: NodeJS.ProcessEnv) {
   return missing;
 }
 
+function parseOtlpHeaders(value: string | undefined): Record<string, string> {
+  if (!value) return {};
+
+  return value.split(",").reduce<Record<string, string>>((headers, pair) => {
+    const [rawKey, ...rawValue] = pair.split("=");
+    const key = rawKey?.trim();
+    const headerValue = rawValue.join("=").trim();
+
+    if (key && headerValue) {
+      headers[key] = headerValue;
+    }
+
+    return headers;
+  }, {});
+}
+
 export function getRuntimeConfig(env: NodeJS.ProcessEnv = process.env): RuntimeConfig {
   const mode = readMode(env.OPS_DESK_MODE);
 
@@ -47,6 +67,10 @@ export function getRuntimeConfig(env: NodeJS.ProcessEnv = process.env): RuntimeC
     neo4jUri: env.NEO4J_URI,
     neo4jUser: env.NEO4J_USER,
     neo4jPassword: env.NEO4J_PASSWORD,
+    otelServiceName: env.OTEL_SERVICE_NAME ?? "opsdesk-ai",
+    otelExporterOtlpEndpoint: env.OTEL_EXPORTER_OTLP_ENDPOINT,
+    otelExporterOtlpTracesEndpoint: env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT,
+    otelExporterOtlpHeaders: parseOtlpHeaders(env.OTEL_EXPORTER_OTLP_HEADERS),
     webhookOutboundEnabled: env.WEBHOOK_DELIVERY_ENABLED === "true" || env.WEBHOOK_OUTBOUND_ENABLED === "true",
     missingDependencies: requiredDependencies(mode, env),
   };

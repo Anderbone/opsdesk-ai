@@ -6,7 +6,7 @@ export const modeComparisons = [
   ["Events", "Kafka/Redpanda-shaped envelopes on screen", "Redpanda or MSK topics with schema compatibility checks"],
   ["Search", "Deterministic in-memory selectors", "OpenSearch lexical/vector hybrid retrieval"],
   ["Graph", "Relationship panel in knowledge route", "Neo4j or Postgres graph projection for investigations"],
-  ["Observability", "Demo trace view in Watchtower", "OpenTelemetry exporter path to managed tracing"],
+  ["Observability", "Demo trace view in Watchtower", "OTLP/JSON trace payloads from Watchtower spans"],
 ];
 
 export const awsServerlessPath = [
@@ -29,6 +29,14 @@ export const infrastructureBoundaries = [
   ["App deploy owns", "React Router bundle, worker image, env-specific feature flags"],
   ["Kubernetes option", "Run web, worker, and replay services as separate deployments with HPA"],
   ["Secrets", "Webhook HMAC keys rotate by version and are never exposed in payloads"],
+];
+
+export const productionNextItems = [
+  ["Auth/RBAC", "Add tenant-scoped sessions and roles for operator, manager, auditor, and integration admin."],
+  ["OpenTelemetry", "Implemented adapter work maps Watchtower traces to OTLP/JSON using OTEL_EXPORTER_OTLP_* config."],
+  ["Evals", "Broaden fixture packs for policy gates, retrieval citations, template routing, and regression thresholds."],
+  ["Queue retries", "Promote pg-boss contracts into workers with exponential backoff, DLQ replay, and idempotency checks."],
+  ["Customer config", "Persist customer-specific channels, templates, SLA rules, risk settings, and webhook destinations."],
 ];
 
 export { dataContracts };

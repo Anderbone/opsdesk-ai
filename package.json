@@ -1,6 +1,6 @@
 {
   "name": "opsdesk-ai",
-  "description": "AI service desk demo for local business operations, triage, RAG drafts, agent blueprints, and watchtower auditing.",
+  "description": "Policy-gated AI service desk demo for local business operations, ticket triage, RAG drafts, agent blueprints, and Watchtower auditing.",
   "private": true,
   "packageManager": "pnpm@10.30.3",
   "type": "module",

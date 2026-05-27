@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { createInMemoryEventBus } from "~/shared/adapters/event-bus";
 import { createInMemoryGraphRepository } from "~/shared/adapters/graph";
-import { createTraceMetadata } from "~/shared/adapters/observability";
+import {
+  createOtlpTracePayload,
+  createTraceMetadata,
+  getOtlpTraceExportTarget,
+} from "~/shared/adapters/observability";
 import { createInMemorySearchRepository } from "~/shared/adapters/search";
 import {
   createWebhookDeliveryClient,
@@ -75,6 +79,63 @@ describe("phase 3 runtime and adapter contracts", () => {
       durationMs: 100,
       spans: [expect.objectContaining({ linkedEventId: "evt-test" })],
     });
+  });
+
+  it("maps Watchtower trace runs into OTLP/JSON export payloads", () => {
+    const config = getRuntimeConfig({
+      OPS_DESK_MODE: "prod",
+      DATABASE_URL: "postgres://opsdesk:opsdesk@localhost:5432/opsdesk",
+      SESSION_SECRET: "prod-session-secret",
+      OTEL_SERVICE_NAME: "opsdesk-ai-prod",
+      OTEL_EXPORTER_OTLP_ENDPOINT: "https://otel.example.com",
+      OTEL_EXPORTER_OTLP_HEADERS: "x-api-key=secret,tenant=dragontech",
+    });
+    const trace = createTraceMetadata(
+      {
+        ticketId: "tkt-cctv",
+        aiRunId: "airun-test",
+        title: "Adapter test trace",
+        startedAt: "2026-05-20T10:00:00.000Z",
+        spans: [
+          {
+            id: "span-test",
+            serviceName: "ai-worker",
+            name: "ticket.triage",
+            kind: "internal",
+            status: "ok",
+            startMs: 20,
+            durationMs: 80,
+            attributes: { correlationId: "corr-test", confidence: 0.91, autoSend: true },
+            linkedEventId: "evt-test",
+          },
+        ],
+      },
+      config,
+    );
+
+    const target = getOtlpTraceExportTarget(config);
+    const payload = createOtlpTracePayload(trace, config);
+    const [span] = payload.resourceSpans[0].scopeSpans[0].spans;
+
+    expect(target).toMatchObject({
+      enabled: true,
+      endpoint: "https://otel.example.com/v1/traces",
+      serviceName: "opsdesk-ai-prod",
+      headers: { "x-api-key": "secret", tenant: "dragontech" },
+    });
+    expect(payload.resourceSpans[0].resource.attributes).toContainEqual({
+      key: "service.name",
+      value: { stringValue: "opsdesk-ai-prod" },
+    });
+    expect(span).toMatchObject({
+      name: "ticket.triage",
+      kind: "SPAN_KIND_INTERNAL",
+      status: { code: "STATUS_CODE_OK" },
+      startTimeUnixNano: "1779271200020000000",
+      endTimeUnixNano: "1779271200100000000",
+    });
+    expect(span.attributes).toContainEqual({ key: "opsdesk.confidence", value: { doubleValue: 0.91 } });
+    expect(span.attributes).toContainEqual({ key: "opsdesk.autoSend", value: { boolValue: true } });
   });
 
   it("signs webhook payloads canonically and keeps outbound delivery opt-in", async () => {

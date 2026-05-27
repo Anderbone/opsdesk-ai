@@ -7,6 +7,7 @@ import {
   deliveryPipeline,
   infrastructureBoundaries,
   modeComparisons,
+  productionNextItems,
 } from "~/lib/platform-data";
 import { Metric, PageHeader } from "~/shared/ui/ui";
 
@@ -78,7 +79,8 @@ export default function PlatformRoute() {
           <div className="content-block">
             <ul className="split-list">
               <li><span>Hosted</span><strong>Demo trace view linked to AI runs, events, and webhook attempts</strong></li>
-              <li><span>Production</span><strong>OpenTelemetry exporter path for spans, logs, and metrics</strong></li>
+              <li><span>Production</span><strong>OTLP/JSON trace payloads from Watchtower spans</strong></li>
+              <li><span>Config</span><strong>OTEL_SERVICE_NAME and OTEL_EXPORTER_OTLP_* drive the export target</strong></li>
               <li><span>Review</span><strong>Approval status and policy gates stay visible beside cost and latency</strong></li>
             </ul>
           </div>
@@ -146,6 +148,19 @@ export default function PlatformRoute() {
             <span>Kept as an explicit boundary so a reviewer can map demo behavior to production infrastructure.</span>
           </div>
         ))}
+      </section>
+
+      <section className="story-band">
+        <h2>Production next is tracked as implementation work.</h2>
+        <div className="case-proof-list">
+          {productionNextItems.map(([title, body]) => (
+            <article key={title}>
+              <RadioTower size={18} />
+              <strong>{title}</strong>
+              <span>{body}</span>
+            </article>
+          ))}
+        </div>
       </section>
     </>
   );

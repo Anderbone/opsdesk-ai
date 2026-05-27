@@ -160,7 +160,7 @@ export default function Watchtower() {
           The demo records each AI output as a reviewable artifact. Approved templates can be sent automatically when
           confidence is high and the request is only collecting missing facts. Complaints, urgent incidents, document
           mismatches, and low-confidence outputs remain human-owned. Hosted mode shows a demo trace view; production
-          mode would send the same span boundaries through an OpenTelemetry exporter path.
+          mode can convert the same span boundaries into OTLP/JSON payloads for an OpenTelemetry collector.
         </p>
       </section>
 

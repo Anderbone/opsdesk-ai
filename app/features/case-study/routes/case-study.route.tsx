@@ -84,12 +84,12 @@ const productFlow = [
 ];
 
 const architectureNodes = [
-  ["Intake", "React Router actions validate enquiries and persist the raw customer source."],
-  ["Queue", "pg-boss-shaped jobs isolate triage, template routing, extraction, retrieval, and evaluation."],
-  ["AI boundary", "Structured outputs force category, confidence, missing info, policy result, and cost fields."],
-  ["Knowledge", "pgvector-ready chunks support cited retrieval from policies, documents, and past tickets."],
-  ["Watchtower", "AI runs, audit events, trace spans, and approval outcomes share the ticket correlation ID."],
-  ["Integrations", "Kafka-shaped events and signed webhooks hand review tasks to CRM or downstream tools."],
+  ["Ticket intake", "React Router actions validate enquiries and persist the raw customer source."],
+  ["AI triage", "Structured outputs force category, confidence, missing info, priority, and next action fields."],
+  ["Knowledge/RAG", "pgvector-ready chunks support cited retrieval from policies, documents, and past tickets."],
+  ["Policy gate", "Template permissions, confidence, urgency, complaints, and mismatches decide auto-send or review."],
+  ["Event/webhook", "Kafka-shaped events and signed webhooks hand review tasks to CRM or downstream tools."],
+  ["Audit/Watchtower", "AI runs, audit events, trace spans, and approval outcomes share the ticket correlation ID."],
 ];
 
 const reviewLedger = [
@@ -97,6 +97,36 @@ const reviewLedger = [
   ["Policy evaluated", "The gate checks confidence, urgency, category, customer risk, and template permissions."],
   ["Human assigned", "Priya owns OD-1025 because urgent phone contact cannot auto-send from the model output."],
   ["Decision recorded", "Approval, rejection, edit notes, prompt hash, template ID, trace ID, tokens, and cost are logged."],
+];
+
+const stackProof = [
+  ["TypeScript", "Domain types for tickets, AI runs, documents, events, webhooks, traces, search, and graph records."],
+  ["React Router", "Full-stack loaders/actions for enquiry intake, ticket workspaces, Watchtower, and platform routes."],
+  ["PostgreSQL + pgvector", "Drizzle schema models tickets, response templates, knowledge chunks, AI runs, and evaluations."],
+  ["Vercel AI SDK", "AI boundary is ready for model calls while the public demo stays deterministic and reviewable."],
+  ["Vitest", "Unit coverage for AI triage, repositories, runtime config, adapters, and OTLP trace export payloads."],
+  ["Playwright", "Route smoke tests cover the desk, enquiry flow, Watchtower, architecture, case study, and integrations."],
+];
+
+const dataModel = [
+  ["Ticket", "Raw customer source, company, contact, category, priority, owner, status, sentiment, and SLA context."],
+  ["AI run", "Prompt version, model, confidence, validation result, selected template, tokens, latency, cost, and output hash."],
+  ["Knowledge chunk", "Policy/document/ticket evidence prepared for retrieval with source metadata and pgvector-ready shape."],
+  ["Audit event", "Policy decision, reviewer action, trace span, event envelope, webhook attempt, and replay context."],
+];
+
+const policyGate = [
+  ["Allowed to auto-send", "High-confidence missing-information requests using approved templates only."],
+  ["Queued for review", "Urgent incidents, complaints, low confidence, document/payment mismatches, refunds, closes, or price commitments."],
+  ["Always logged", "Every model output keeps prompt version, validation result, correlation ID, cost, latency, and reviewer outcome."],
+];
+
+const productionNext = [
+  ["Auth/RBAC", "Add tenant-aware roles for operator, manager, auditor, and integration-admin workflows."],
+  ["Observability", "Implemented now: Watchtower traces can be converted to OTLP/JSON via OTEL_EXPORTER_OTLP_* config."],
+  ["Evals", "Expand fixture regression packs for template selection, retrieval citations, and policy-gate decisions."],
+  ["Queue retries", "Move pg-boss job contracts from simulator to retryable workers with DLQ replay controls."],
+  ["Customer config", "Persist per-customer channels, templates, SLA rules, risk settings, and webhook destinations."],
 ];
 
 const roleProof = [
@@ -232,6 +262,29 @@ export default function CaseStudy() {
         </div>
       </section>
 
+      <section className="story-band">
+        <h2>Workflow and data model</h2>
+        <div className="case-story-copy">
+          <p>
+            The core product object is a ticket, not a chat message. Each ticket keeps the raw customer input beside AI
+            summaries, selected templates, policy decisions, events, webhook attempts, and Watchtower trace spans.
+          </p>
+          <p>
+            That model makes the workflow obvious: intake creates durable state, AI prepares a bounded recommendation,
+            policy decides whether automation is allowed, and the audit trail explains the decision later.
+          </p>
+        </div>
+        <div className="case-proof-list">
+          {dataModel.map(([title, body]) => (
+            <article key={title}>
+              <Database size={18} />
+              <strong>{title}</strong>
+              <span>{body}</span>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="case-role-section" aria-label="Solution, role, and tradeoffs">
         {roleProof.map(([title, body]) => (
           <article key={title}>
@@ -257,6 +310,19 @@ export default function CaseStudy() {
                 <small>{item.body}</small>
               </figcaption>
             </figure>
+          ))}
+        </div>
+      </section>
+
+      <section className="story-band" aria-label="Technical stack proof">
+        <h2>Full-stack implementation proof</h2>
+        <div className="case-proof-list">
+          {stackProof.map(([title, body]) => (
+            <article key={title}>
+              <Bot size={18} />
+              <strong>{title}</strong>
+              <span>{body}</span>
+            </article>
           ))}
         </div>
       </section>
@@ -309,6 +375,14 @@ export default function CaseStudy() {
             OD-1025 is the clearest story: AI summarises an urgent Wi-Fi incident and drafts diagnostic questions, but
             the policy gate blocks auto-send because phone contact and customer urgency require a named human owner.
           </p>
+          <div className="policy-list" aria-label="AI policy boundary">
+            {policyGate.map(([title, body]) => (
+              <article key={title}>
+                <strong>{title}</strong>
+                <span>{body}</span>
+              </article>
+            ))}
+          </div>
           <Link className="button button-primary" to="/watchtower">
             Open Watchtower
             <ArrowUpRight size={16} />
@@ -324,6 +398,21 @@ export default function CaseStudy() {
               </div>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="story-band">
+        <h2>Outcome</h2>
+        <div className="case-story-copy">
+          <p>
+            DragonTech gets one queue for quotes, urgent incidents, compliance chasing, document exceptions, and
+            complaints. Operators can scan ownership and next actions quickly, while reviewers can inspect every AI
+            decision before trusting it.
+          </p>
+          <p>
+            The result is a demo that shows the ambiguous business problem, the workflow model, the data model, and the
+            AI boundary on the page instead of hiding those details in architecture notes.
+          </p>
         </div>
       </section>
 
@@ -344,6 +433,19 @@ export default function CaseStudy() {
             real operational workflow, protect data integrity, automate the repeatable path, keep exceptions reviewable,
             and design the result so it can be demoed, supported, and extended.
           </p>
+        </div>
+      </section>
+
+      <section className="story-band">
+        <h2>Production next</h2>
+        <div className="case-proof-list">
+          {productionNext.map(([title, body]) => (
+            <article key={title}>
+              <MonitorCheck size={18} />
+              <strong>{title}</strong>
+              <span>{body}</span>
+            </article>
+          ))}
         </div>
       </section>
 

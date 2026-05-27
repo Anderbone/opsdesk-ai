@@ -1,6 +1,6 @@
 # OpsDesk AI
 
-OpsDesk AI is a full-stack, policy-gated AI workflow demo that turns messy service enquiries into structured tickets, retrieval-aware drafts, human approval gates, audit trails, and production-ready integration boundaries.
+OpsDesk AI is a policy-gated AI service desk demo for local business operations: messy customer enquiries become structured tickets, retrieval-aware drafts, approved-template responses, human review queues, and Watchtower audit trails.
 
 **Live demo:** [opsdesk-ai.netlify.app](https://opsdesk-ai.netlify.app/)
 
@@ -14,7 +14,7 @@ If you only have a few minutes:
 4. `/watchtower` - review prompt/model metadata, validation, audit events, cost, latency, and approval status.
 5. `/platform` and `/architecture` - see how the hosted demo maps to Postgres, pgvector, queues, webhooks, observability, search, and graph boundaries.
 
-The `/case-study` route includes product screenshots, a short animated workflow GIF, an inline architecture diagram, DragonTech case-study metrics, and an explicit AI workflow, human-review, and audit-trail narrative.
+The `/case-study` route includes the ambiguous business problem, workflow design, data model, AI policy gate, audit trail, outcome, product screenshots, a short animated workflow GIF, and an inline architecture diagram.
 
 Visual assets are committed under `public/showcase/`:
 
@@ -22,6 +22,12 @@ Visual assets are committed under `public/showcase/`:
 - `watchtower.png` - AI audit screenshot
 - `architecture.png` - architecture route screenshot
 - `opsdesk-flow.gif` - short dashboard to ticket to Watchtower walkthrough
+
+![OpsDesk dashboard screenshot](public/showcase/dashboard.png)
+
+![OpsDesk workflow GIF](public/showcase/opsdesk-flow.gif)
+
+![Watchtower audit screenshot](public/showcase/watchtower.png)
 
 This project reflects the same implementation pattern I use in enterprise software delivery: understand the real operational workflow, protect data integrity, automate the repeatable path, keep exceptions reviewable, and design the result so it can be demoed, supported, and extended.
 
@@ -39,15 +45,28 @@ AI behaves like a junior operations assistant. It can classify, summarise, extra
 
 The expanded Agent Delivery and Platform routes also show the consulting and MLE story: client discovery, success metrics, agentic solution design, LLM prototyping, RAG with pgvector, event contracts, webhooks, evaluation, production rollout, monitoring, and ROI measurement.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  intake[Ticket intake] --> triage[AI triage]
+  triage --> rag[Knowledge / RAG]
+  rag --> gate[Policy gate]
+  gate -->|approved template| event[Event / webhook]
+  gate -->|risky case| review[Human review]
+  event --> audit[Audit / Watchtower]
+  review --> audit
+```
+
+The AI boundary is explicit: approved templates can auto-send only for high-confidence missing-information requests. Risky cases queue for review, including urgent incidents, complaints, payment or document mismatches, low-confidence outputs, refunds, closes, and price commitments.
+
 ## Stack
 
-- React Router framework mode
-- React 19
-- TypeScript
-- Drizzle schema for PostgreSQL
-- pgvector-ready knowledge schema for RAG
-- pg-boss worker scaffold
-- AI SDK-ready boundary with deterministic demo AI
+- Full-stack TypeScript with React 19 and React Router framework mode
+- PostgreSQL data model through Drizzle schema, with pgvector-ready knowledge chunks for RAG
+- Vercel AI SDK-ready boundary with deterministic demo AI for public reliability
+- pg-boss worker scaffold for triage, extraction, retrieval, evaluation, and webhook jobs
+- Vitest unit coverage and Playwright route smoke tests
 - Custom shadcn-inspired UI system
 
 ## Run Locally
@@ -82,6 +101,16 @@ The public demo uses a cookie-backed fake session store. Each visitor starts fro
 Optional Netlify environment variable:
 
 - `SESSION_SECRET` - signs the demo session cookie.
+
+## Production Next
+
+The production roadmap is visible in the app and now includes concrete adapter work, not only copy:
+
+- Auth/RBAC: tenant-aware sessions and roles for operator, manager, auditor, and integration admin.
+- Observability: Watchtower traces can be converted to OTLP/JSON payloads using `OTEL_SERVICE_NAME` and `OTEL_EXPORTER_OTLP_*` config.
+- Evals: expand fixture regression packs for template selection, retrieval citations, policy gates, and confidence thresholds.
+- Queue retries: promote pg-boss contracts into workers with exponential backoff, DLQ replay, and idempotency checks.
+- Customer configuration: persist customer-specific channels, templates, SLA rules, risk settings, and webhook destinations.
 
 ## Optional Local Production Runtime
 
@@ -139,7 +168,7 @@ Phase 3 adds explicit boundaries under `app/shared/adapters`:
 
 - Runtime config: `OPS_DESK_MODE`, dependency checks, and outbound-webhook opt-in.
 - Event bus: publish, subscribe/dispatch, retry metadata, idempotency, and DLQ records.
-- Observability: trace and span metadata that links Watchtower, events, and webhook attempts.
+- Observability: trace and span metadata that links Watchtower, events, and webhook attempts, plus OTLP/JSON export payload mapping.
 - Webhooks: canonical payloads, HMAC signatures, idempotency keys, retry scheduling, and no real outbound calls unless configured.
 - Search: document indexing, faceted search, and read-model rebuild contracts.
 - Graph: relationship node/edge listing and predefined graph query answers.
@@ -154,7 +183,7 @@ Terraform skeletons live in `infra/terraform/` and are safe to inspect only; the
 
 - Product workflow: `/dashboard`, `/enquiry`, and `/tickets/:ticketId` show intake, triage, drafts, document extraction, and follow-ups.
 - AI safety/evaluation: `/watchtower` shows prompt versions, validation status, approval gates, costs, and demo trace details.
-- Observability: `/watchtower` links AI runs to trace spans, events, and webhook attempts, with an OpenTelemetry exporter path for production.
+- Observability: `/watchtower` links AI runs to trace spans, events, and webhook attempts, with OTLP/JSON payloads ready for an OpenTelemetry collector.
 - Event-driven architecture: `/events` shows Kafka/Redpanda-shaped envelopes, schema versions, idempotency keys, consumer lag, retries, and DLQ context.
 - Webhooks/integration: `/webhooks` shows endpoint ownership, signed payloads, timestamp tolerance, idempotency, secret rotation, retries, inbound examples, and replay.
 - CI/CD/testing: `/platform` maps unit, typecheck, build, route smoke, preview deploy, and release gates.
