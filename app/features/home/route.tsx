@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   FileText,
   Inbox,
+  Mail,
   MessageSquareText,
   ShieldCheck,
   Sparkles,
@@ -77,6 +78,10 @@ export default function Home() {
             <Link className="button button-ghost" to="/dashboard">
               Open the desk
             </Link>
+            <a className="button button-ghost" href="mailto:yn.jiyu@gmail.com">
+              <Mail size={16} />
+              Contact me
+            </a>
           </div>
         </div>
 

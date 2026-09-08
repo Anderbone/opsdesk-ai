@@ -9,6 +9,22 @@ test("homepage renders product title and navigates to dashboard", async ({ page 
   await expect(page.getByRole("heading", { name: /ai-assisted service desk/i })).toBeVisible();
 });
 
+test("mobile navigation opens from the topbar without horizontal page scroll", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+
+  await expect(page.getByRole("link", { name: /email jiyu/i })).toHaveAttribute("href", "mailto:yn.jiyu@gmail.com");
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+
+  await page.getByRole("button", { name: /open menu/i }).click();
+  await expect(page.getByRole("link", { name: /^Desk$/ })).toBeVisible();
+  await page.getByRole("link", { name: /^Desk$/ }).click();
+
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page.getByRole("heading", { name: /ai-assisted service desk/i })).toBeVisible();
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
 test("dashboard shows seeded tickets and opens a ticket", async ({ page }) => {
   await page.goto("/dashboard");
 

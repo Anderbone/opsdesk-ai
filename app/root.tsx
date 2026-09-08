@@ -1,4 +1,5 @@
 import type { LinksFunction, MetaFunction } from "react-router";
+import { useState } from "react";
 import {
   Links,
   Meta,
@@ -16,12 +17,15 @@ import {
   Github,
   Home,
   Inbox,
+  Mail,
+  MoreHorizontal,
   Network,
   MonitorCheck,
   Plus,
   RadioTower,
   Search,
   ServerCog,
+  X,
   Webhook,
   Workflow,
 } from "lucide-react";
@@ -79,10 +83,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const navigation = useNavigation();
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   return (
     <div className="app-shell">
-      <aside className="sidebar">
+      <aside className={`sidebar ${isMobileNavOpen ? "open" : ""}`} aria-label="Main menu">
         <NavLink to="/" className="brand-lockup">
           <span className="brand-mark">
             <Bot size={20} />
@@ -93,12 +98,22 @@ export default function App() {
           </span>
         </NavLink>
 
-        <nav className="side-nav" aria-label="Main navigation">
+        <button
+          className="sidebar-close"
+          type="button"
+          aria-label="Close menu"
+          onClick={() => setIsMobileNavOpen(false)}
+        >
+          <X size={18} />
+        </button>
+
+        <nav id="main-navigation" className="side-nav" aria-label="Main navigation">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) => `side-link ${isActive ? "active" : ""}`}
+              onClick={() => setIsMobileNavOpen(false)}
             >
               <item.icon size={17} />
               <span>{item.label}</span>
@@ -126,14 +141,34 @@ export default function App() {
           <span>View source</span>
         </a>
       </aside>
+      <button
+        className={`nav-backdrop ${isMobileNavOpen ? "open" : ""}`}
+        type="button"
+        aria-label="Close menu"
+        onClick={() => setIsMobileNavOpen(false)}
+      />
 
       <div className="main-region">
         <header className="topbar">
-          <div>
+          <button
+            className="mobile-nav-toggle"
+            type="button"
+            aria-label="Open menu"
+            aria-expanded={isMobileNavOpen}
+            aria-controls="main-navigation"
+            onClick={() => setIsMobileNavOpen(true)}
+          >
+            <MoreHorizontal size={22} />
+          </button>
+          <div className="topbar-title">
             <span className="eyebrow">AI service desk demo</span>
             <strong>Live operations workspace</strong>
           </div>
           <div className="topbar-right">
+            <a className="topbar-mail" href="mailto:yn.jiyu@gmail.com" aria-label="Email Jiyu">
+              <Mail size={15} />
+              <span>Contact</span>
+            </a>
             <span className="live-chip">
               <Activity size={14} />
               Demo data
